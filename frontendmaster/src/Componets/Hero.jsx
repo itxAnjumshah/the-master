@@ -11,7 +11,7 @@ import Contact from './Contact';
 export default function Hero() {
   return (
     <>
-    {/* <Navbar/> */}
+    <Navbar/>
     <Home/>
     <About/>
     <Service/>
