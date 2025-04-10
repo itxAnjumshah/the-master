@@ -76,7 +76,7 @@ const Certificatedesign = ({
           </div>
 
           {/* Certification Statement */}
-          <p className="text-xs sm:text-md leading-relaxed text-black font-bold mb-8 px-4 sm:px-8">
+          <p className="text-xl sm:text-md leading-relaxed text-black font-bold mb-8 px-4 sm:px-8">
             has successfully completed the <span className="font-semibold text-green-700">{course}</span> training program<br />
             with distinction and is hereby recognized as a qualified professional.
           </p>
