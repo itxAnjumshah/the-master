@@ -14,6 +14,24 @@ const api = axios.create({
   }
 });
 
+// Add request interceptor for debugging
+api.interceptors.request.use(request => {
+  console.log('Starting Request:', request);
+  return request;
+});
+
+// Add response interceptor for debugging
+api.interceptors.response.use(
+  response => {
+    console.log('Response:', response);
+    return response;
+  },
+  error => {
+    console.error('API Error:', error.response || error);
+    return Promise.reject(error);
+  }
+);
+
 export default function Certificate() {
   const [certificate, setCertificate] = useState(false);
   const [searchInput, setSearchInput] = useState("");
@@ -32,7 +50,10 @@ export default function Certificate() {
     setLoading(true);
 
     try {
+      console.log('Searching for certificate:', searchInput.trim());
       const response = await api.get(`/api/certificates/${searchInput.trim()}`);
+      console.log('Certificate response:', response.data);
+      
       if (response.data) {
         setCertificateData(response.data);
         setCertificate(true);
@@ -41,17 +62,17 @@ export default function Certificate() {
         throw new Error('No certificate data received');
       }
     } catch (error) {
+      console.error('Certificate search error:', error);
       setCertificate(false);
       setCertificateData(null);
       let errorMessage = 'No Certificate Found ❌';
       
       if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
         errorMessage = error.response.data?.message || errorMessage;
       } else if (error.request) {
-        // The request was made but no response was received
         errorMessage = 'Network error. Please check your connection.';
+      } else {
+        errorMessage = error.message || errorMessage;
       }
       
       setSearchStatus({ type: 'error', message: errorMessage });
