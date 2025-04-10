@@ -14,14 +14,14 @@ const api = axios.create({
 
 // Add request interceptor for debugging
 api.interceptors.request.use(request => {
-  console.log('Starting Request:', request);
+  // console.log('Starting Request:', request);
   return request;
 });
 
 // Add response interceptor for debugging
 api.interceptors.response.use(
   response => {
-    console.log('Response:', response);
+    // console.log('Response:', response);
     return response;
   },
   error => {
@@ -200,13 +200,13 @@ export default function AllCertificates() {
           </div>
 
           {/* Navigation Header */}
-          <div className="flex justify-between items-center mb-6">
+          {/* <div className="flex justify-between items-center mb-6">
             <button
               onClick={previousCertificate}
               className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600"
               disabled={filteredCertificates.length <= 1}
             >
-              <FaArrowLeft /> Previous
+              <FaArrowLeft /> Previousss
             </button>
             <div className="text-center">
               <h2 className="text-2xl font-bold">
@@ -221,11 +221,11 @@ export default function AllCertificates() {
             >
               Next <FaArrowRight />
             </button>
-          </div>
+          </div> */}
 
           {/* Certificate Display */}
-          <div className="relative">
-            <div className="absolute top-4 right-4 flex gap-2 z-10">
+          <div className="relative flex flex-col items-center justify-center">
+            {/* <div className="absolute top-4 right-4 flex gap-2 z-10">
               <button
                 onClick={() => handleEdit(currentCertificate)}
                 className="bg-blue-500 text-white p-3 rounded-full hover:bg-blue-600 transition-colors"
@@ -238,8 +238,8 @@ export default function AllCertificates() {
               >
                 <FaTrash size={20} />
               </button>
-            </div>
-            <div className="certificate-container">
+            </div> */}
+            <div className="certificate-content">
               <PremiumCertificate
                 name={currentCertificate.name}
                 course={currentCertificate.machineName}
@@ -251,6 +251,68 @@ export default function AllCertificates() {
                 image={currentCertificate.image}
               />
             </div>
+          </div>
+
+          <div className="flex justify-center items-center gap-4 mt-4">
+            <button
+              onClick={previousCertificate}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600"
+              disabled={filteredCertificates.length <= 1}
+            >
+              <FaArrowLeft /> Previous
+            </button>
+            <button
+              onClick={nextCertificate}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600"
+              disabled={filteredCertificates.length <= 1}
+            >
+              Next <FaArrowRight />
+            </button>
+            <button
+              onClick={() => handleEdit(currentCertificate)}
+              className="bg-blue-500 text-white p-3 rounded-full hover:bg-blue-600 transition-colors"
+            >
+              <FaEdit size={20} />
+            </button>
+            <button
+              onClick={() => handleDelete(currentCertificate)}
+              className="bg-red-500 text-white p-3 rounded-full hover:bg-red-600 transition-colors"
+            >
+              <FaTrash size={20} />
+            </button>
+            <button
+              onClick={() => {
+                const certificateContent = document.querySelector('.certificate-content');
+                if (certificateContent) {
+                  const printWindow = window.open('', '_blank');
+                  printWindow.document.write('<html><head><title>Print Certificate</title>');
+                  const styles = Array.from(document.styleSheets)
+                    .map(styleSheet => {
+                      try {
+                        return Array.from(styleSheet.cssRules)
+                          .map(rule => rule.cssText)
+                          .join('');
+                      } catch (e) {
+                        return '';
+                      }
+                    })
+                    .join('');
+                  printWindow.document.write(`<style>${styles}</style>`);
+                  printWindow.document.write('</head><body>');
+                  printWindow.document.write(certificateContent.innerHTML);
+                  printWindow.document.write('</body></html>');
+                  printWindow.document.close();
+                  printWindow.focus();
+                  printWindow.print();
+                  printWindow.close();
+                } else {
+                  alert('Certificate content not found.');
+                }
+              }}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Print Certificate
+            </button>
           </div>
         </div>
       </div>

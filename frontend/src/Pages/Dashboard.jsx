@@ -4,7 +4,7 @@ import "aos/dist/aos.css";
 import { FaPlus, FaList, FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import AddCertificate from "../Componets/Addcertifcate";
-import AllCertificate from "../Componets/Allcertifcate";
+import AllCertificates from "../Componets/AllCertificates";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("add");
@@ -88,10 +88,44 @@ export default function Dashboard() {
         <h1 className="text-3xl font-bold mb-6 text-gray-700 border-b-2 pb-2 text-center md:text-left" data-aos="fade-down">
           Dashboard
         </h1>
-        <section className="p-6 bg-gray-50 rounded-lg shadow-md" data-aos="fade-up">
+        <section id="certificate-section" className="p-6 bg-gray-50 rounded-lg shadow-md" data-aos="fade-up">
           {activeTab === "add" && <AddCertificate />}
-          {activeTab === "all" && <AllCertificate />}
+          {activeTab === "all" && <AllCertificates />}
         </section>
+        {/* <button
+          onClick={() => {
+            const certificateContent = document.querySelector('.certificate-content');
+            if (certificateContent) {
+              const printWindow = window.open('', '_blank');
+              printWindow.document.write('<html><head><title>Print Certificate</title>');
+              // Include styles
+              const styles = Array.from(document.styleSheets)
+                .map(styleSheet => {
+                  try {
+                    return Array.from(styleSheet.cssRules)
+                      .map(rule => rule.cssText)
+                      .join('');
+                  } catch (e) {
+                    return '';
+                  }
+                })
+                .join('');
+              printWindow.document.write(`<style>${styles}</style>`);
+              printWindow.document.write('</head><body>');
+              printWindow.document.write(certificateContent.innerHTML);
+              printWindow.document.write('</body></html>');
+              printWindow.document.close();
+              printWindow.focus();
+              printWindow.print();
+              printWindow.close();
+            } else {
+              alert('Certificate content not found.');
+            }
+          }}
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4 hover:bg-blue-600 transition-colors"
+        >
+          Print Certificates
+        </button> */}
       </main>
     </div>
   );

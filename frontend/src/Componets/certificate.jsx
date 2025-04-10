@@ -23,7 +23,7 @@ api.interceptors.request.use(request => {
 // Add response interceptor for debugging
 api.interceptors.response.use(
   response => {
-    console.log('Response:', response);
+    // console.log('Response:', response);
     return response;
   },
   error => {
@@ -50,9 +50,9 @@ export default function Certificate() {
     setLoading(true);
 
     try {
-      console.log('Searching for certificate:', searchInput.trim());
+      // console.log('Searching for certificate:', searchInput.trim());
       const response = await api.get(`/api/certificates/${searchInput.trim()}`);
-      console.log('Certificate response:', response.data);
+      // console.log('Certificate response:', response.data);
       
       if (response.data) {
         setCertificateData(response.data);
@@ -105,7 +105,19 @@ export default function Certificate() {
                 height: 100vh;
               }
             }
+            /* Add your styles here */
+            body {
+              font-family: Arial, sans-serif;
+              background-color: #f4f4f9;
+            }
+            .certificate-container {
+              padding: 20px;
+              border: 1px solid #ccc;
+              border-radius: 8px;
+              box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
           </style>
+          <link rel="stylesheet" href="path/to/your/styles.css">
         </head>
         <body>
           <div class="certificate-container">
@@ -197,7 +209,7 @@ export default function Certificate() {
 
       {certificate && certificateData && (
         <div className="mt-8 w-full max-w-4xl">
-          <div ref={certificateRef} className="bg-white p-2 shadow-lg rounded-lg">
+          <div ref={certificateRef} className="bg-white p-2 shadow-lg rounded-lg flex flex-col items-center justify-center">
             <PremiumCertificate
               name={certificateData.name}
               course={certificateData.machineName}

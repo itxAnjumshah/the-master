@@ -50,7 +50,7 @@ const Certificatedesign = ({
           {/* Roll & Registration Number */}
           <div className="flex justify-between text-xs sm:text-sm mb-4 font-semibold">
             <div className="bg-gray-200 px-2 py-1 rounded-full text-black">Roll No: <span className="text-black">{certificateNumber}</span></div>
-            <div className="bg-gray-200 px-2 py-1 rounded-full text-black">Registration No: <span className="text-black">{certificateNumber}</span></div>
+            <div className="bg-gray-200 px-2 py-1 rounded-full text-black">Registration No: <span className="text-black">580123</span></div>
           </div>
 
           {/* Header */}
