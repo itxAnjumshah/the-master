@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import PremiumCertificate from './Certiificatedesign';
-import { FaEdit, FaArrowLeft, FaArrowRight, FaTimes, FaTrash, FaImage } from 'react-icons/fa';
+import { FaEdit, FaArrowLeft, FaArrowRight, FaTimes, FaTrash, FaImage, FaSearch } from 'react-icons/fa';
 
 const api = axios.create({
   baseURL: 'http://localhost:5000',
@@ -38,7 +38,15 @@ export default function AllCertificates() {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const fileInputRef = useRef(null);
+
+  // Get filtered certificates
+  const filteredCertificates = certificates.filter(cert => 
+    cert.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    cert.rollNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    cert.machineName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Fetch all certificates
   useEffect(() => {
@@ -122,11 +130,15 @@ export default function AllCertificates() {
   };
 
   const nextCertificate = () => {
-    setCurrentIndex((prev) => (prev + 1) % certificates.length);
+    if (filteredCertificates.length > 0) {
+      setCurrentIndex((prev) => (prev + 1) % filteredCertificates.length);
+    }
   };
 
   const previousCertificate = () => {
-    setCurrentIndex((prev) => (prev - 1 + certificates.length) % certificates.length);
+    if (filteredCertificates.length > 0) {
+      setCurrentIndex((prev) => (prev - 1 + filteredCertificates.length) % filteredCertificates.length);
+    }
   };
 
   if (loading) {
@@ -159,27 +171,53 @@ export default function AllCertificates() {
     );
   }
 
-  const currentCertificate = certificates[currentIndex];
+  const currentCertificate = filteredCertificates[currentIndex] || certificates[0];
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-6xl mx-auto">
         <div className="bg-white rounded-lg shadow-lg p-6">
+          {/* Search Bar */}
+          <div className="mb-6">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search by name, roll number, or machine name..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentIndex(0); // Reset to first result when searching
+                }}
+                className="w-full px-4 py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            </div>
+            {searchQuery && (
+              <p className="mt-2 text-sm text-gray-600">
+                Found {filteredCertificates.length} matching certificates
+              </p>
+            )}
+          </div>
+
           {/* Navigation Header */}
           <div className="flex justify-between items-center mb-6">
             <button
               onClick={previousCertificate}
               className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600"
+              disabled={filteredCertificates.length <= 1}
             >
               <FaArrowLeft /> Previous
             </button>
             <div className="text-center">
-              <h2 className="text-2xl font-bold">Certificate {currentIndex + 1} of {certificates.length}</h2>
+              <h2 className="text-2xl font-bold">
+                Certificate {currentIndex + 1} of {filteredCertificates.length}
+              </h2>
               <p className="text-gray-600">Roll No: {currentCertificate.rollNo}</p>
             </div>
             <button
               onClick={nextCertificate}
               className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600"
+              disabled={filteredCertificates.length <= 1}
             >
               Next <FaArrowRight />
             </button>
