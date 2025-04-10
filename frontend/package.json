@@ -1,0 +1,44 @@
+{
+  "name": "frontendmaster",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fontsource/rochester": "^5.0.0",
+    "aos": "^2.3.4",
+    "axios": "^1.8.4",
+    "cors": "^2.8.5",
+    "dom-to-image": "^2.6.0",
+    "dom-to-image-more": "^3.5.0",
+    "framer-motion": "^10.16.4",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.11.0",
+    "react-router-dom": "^6.20.0",
+    "react-scroll": "^1.9.3",
+    "react-simple-typewriter": "^5.0.1",
+    "react-slick": "^0.30.3",
+    "react-to-print": "^3.0.5",
+    "slick-carousel": "^1.8.1",
+    "tailwindcss": "^3.3.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@vitejs/plugin-react": "^4.0.3",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.53.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.4",
+    "postcss": "^8.4.31",
+    "vite": "^4.4.11"
+  }
+}
