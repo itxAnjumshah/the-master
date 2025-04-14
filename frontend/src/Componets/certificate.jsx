@@ -1,6 +1,4 @@
 import React, { useState, useRef, useCallback } from "react";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 import axios from 'axios';
 import PremiumCertificate from "./Certiificatedesign"; // Fixed typo in import
 
@@ -93,42 +91,7 @@ export default function Certificate() {
     }
 
     try {
-      // Get all stylesheets from the current document
-      const styles = Array.from(document.styleSheets)
-        .map(styleSheet => {
-          try {
-            // Try to get all CSS rules from the stylesheet
-            return Array.from(styleSheet.cssRules)
-              .map(rule => rule.cssText)
-              .join('');
-          } catch (e) {
-            // If stylesheet is from a different origin, we can't access its rules
-            // Try to use the href instead if available
-            if (styleSheet.href) {
-              return `@import url("${styleSheet.href}");`;
-            }
-            return '';
-          }
-        })
-        .filter(Boolean)
-        .join('\n');
-        
-      // Create a copy of the certificate to manipulate
-      const certClone = certificateElement.cloneNode(true);
-      
-      // Convert the certificate's inline styles to be included in the print window
-      Array.from(certClone.querySelectorAll('*')).forEach(element => {
-        // Get computed styles
-        const computedStyle = window.getComputedStyle(element);
-        // Apply computed styles as inline styles
-        for (let i = 0; i < computedStyle.length; i++) {
-          const prop = computedStyle[i];
-          const value = computedStyle.getPropertyValue(prop);
-          element.style[prop] = value;
-        }
-      });
-
-      // Open print window
+      // Create a new window for printing
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
         setSearchStatus({ type: 'error', message: 'Please allow popups to print the certificate' });
@@ -136,115 +99,53 @@ export default function Certificate() {
         return;
       }
 
+      // Get the certificate HTML
+      const certificateHTML = certificateElement.innerHTML;
+
+      // Write the HTML to the print window
       printWindow.document.write(`
         <!DOCTYPE html>
         <html>
           <head>
             <title>Certificate</title>
+            <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
             <style>
-              ${styles}
-              
               @page {
                 size: A4 landscape;
                 margin: 0;
               }
-              
               body {
                 margin: 0;
                 padding: 0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                background-color: white;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
                 color-adjust: exact !important;
               }
-              
               .certificate-container {
                 width: 100%;
-                height: 100%;
+                height: 100vh;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                overflow: hidden;
+                background-color: white;
               }
-              
-              .certificate-content {
-                transform-origin: center;
-                width: 100%;
-                height: 100%;
-              }
-              
-              /* Additional styles to ensure all elements are visible */
-              * {
-                visibility: visible !important;
-                opacity: 1 !important;
-                overflow: visible !important;
-              }
-              
-              /* Force background colors and images to print */
               * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
                 color-adjust: exact !important;
               }
             </style>
-            
-            <!-- Import your app's main CSS file if it exists -->
-            <link rel="stylesheet" href="/css/main.css" />
-            <link rel="stylesheet" href="/css/tailwind.css" />
           </head>
           <body>
             <div class="certificate-container">
-              <div class="certificate-content">
-                ${certClone.outerHTML}
-              </div>
+              ${certificateHTML}
             </div>
             <script>
               window.onload = function() {
-                try {
-                  // Make sure all images are loaded
-                  const images = document.querySelectorAll('img');
-                  const imagePromises = Array.from(images).map(img => {
-                    if (img.complete) return Promise.resolve();
-                    return new Promise(resolve => {
-                      img.onload = img.onerror = resolve;
-                    });
-                  });
-                  
-                  Promise.all(imagePromises).then(() => {
-                    // Resize certificate to fit perfectly on A4
-                    const container = document.querySelector('.certificate-container');
-                    const content = document.querySelector('.certificate-content');
-                    
-                    // A4 landscape dimensions in pixels (assuming 96 DPI)
-                    const a4Width = 1123; // 297mm
-                    const a4Height = 794; // 210mm
-                    
-                    // Calculate scaling ratio
-                    const contentWidth = content.scrollWidth;
-                    const contentHeight = content.scrollHeight;
-                    
-                    // Apply scaling to fit A4 precisely
-                    const scaleX = a4Width / contentWidth;
-                    const scaleY = a4Height / contentHeight;
-                    const scale = Math.min(scaleX, scaleY) * 0.95; // 5% margin
-                    
-                    content.style.transform = 'scale(' + scale + ')';
-                    
-                    // Print after short delay to ensure proper rendering
-                    setTimeout(function() {
-                      window.print();
-                      window.close();
-                    }, 1500);
-                  });
-                } catch (error) {
-                  console.error('Print error:', error);
-                  alert('Error while preparing to print. Please try again.');
+                setTimeout(function() {
+                  window.print();
                   window.close();
-                }
+                }, 1000);
               }
             </script>
           </body>
@@ -260,75 +161,6 @@ export default function Certificate() {
       setLoading(false);
     }
   }, []);
-
-  const handleDownloadPDF = useCallback(async () => {
-    setLoading(true);
-    setSearchStatus({ type: 'loading', message: 'Generating PDF...' });
-    
-    const certificateElement = certificateRef.current;
-    if (!certificateElement) {
-      setLoading(false);
-      setSearchStatus({ type: 'error', message: 'Cannot download: certificate not rendered properly' });
-      return;
-    }
-
-    try {
-      // Get exact A4 dimensions
-      const a4Width = 297; // mm
-      const a4Height = 210; // mm
-      
-      // Create canvas with optimal dimensions for A4
-      const canvas = await html2canvas(certificateElement, {
-        scale: 2, // Higher scale for better quality
-        logging: false,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: 'white',
-        imageTimeout: 15000, // Increased timeout for images
-        onclone: (document) => {
-          // Force all images to be loaded before capturing
-          const imgs = document.getElementsByTagName('img');
-          for (let i = 0; i < imgs.length; i++) {
-            imgs[i].crossOrigin = "anonymous";
-          }
-        }
-      });
-
-      // Create PDF exactly A4 size
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4'
-      });
-      
-      // Calculate image dimensions to fit perfectly on A4
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      
-      // Calculate scaling ratio
-      const ratio = Math.min(a4Width / imgWidth, a4Height / imgHeight) * 0.98; // 2% margin
-      
-      // Center the image
-      const x = (a4Width - (imgWidth * ratio)) / 2;
-      const y = (a4Height - (imgHeight * ratio)) / 2;
-      
-      // Add the image to the PDF
-      const imgData = canvas.toDataURL('image/png');
-      pdf.addImage(imgData, 'PNG', x, y, imgWidth * ratio, imgHeight * ratio);
-      
-      // Save PDF
-      pdf.save(`certificate-${certificateData.rollNo}.pdf`);
-      setSearchStatus({ type: 'success', message: 'PDF generated successfully' });
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      setSearchStatus({ 
-        type: 'error', 
-        message: 'Error generating PDF. Please try again.' 
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [certificateData]);
 
   const renderCertificate = () => {
     try {
@@ -411,15 +243,6 @@ export default function Certificate() {
               }`}
             >
               {loading ? 'Preparing Print...' : 'Print Certificate'}
-            </button>
-            <button
-              onClick={handleDownloadPDF}
-              disabled={loading}
-              className={`bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-md transition duration-200 ${
-                loading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {loading ? 'Generating PDF...' : 'Download PDF'}
             </button>
           </div>
         </div>

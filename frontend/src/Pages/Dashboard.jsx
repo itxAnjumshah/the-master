@@ -92,40 +92,8 @@ export default function Dashboard() {
           {activeTab === "add" && <AddCertificate />}
           {activeTab === "all" && <AllCertificates />}
         </section>
-        {/* <button
-          onClick={() => {
-            const certificateContent = document.querySelector('.certificate-content');
-            if (certificateContent) {
-              const printWindow = window.open('', '_blank');
-              printWindow.document.write('<html><head><title>Print Certificate</title>');
-              // Include styles
-              const styles = Array.from(document.styleSheets)
-                .map(styleSheet => {
-                  try {
-                    return Array.from(styleSheet.cssRules)
-                      .map(rule => rule.cssText)
-                      .join('');
-                  } catch (e) {
-                    return '';
-                  }
-                })
-                .join('');
-              printWindow.document.write(`<style>${styles}</style>`);
-              printWindow.document.write('</head><body>');
-              printWindow.document.write(certificateContent.innerHTML);
-              printWindow.document.write('</body></html>');
-              printWindow.document.close();
-              printWindow.focus();
-              printWindow.print();
-              printWindow.close();
-            } else {
-              alert('Certificate content not found.');
-            }
-          }}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4 hover:bg-blue-600 transition-colors"
-        >
-          Print Certificates
-        </button> */}
+      
+        
       </main>
     </div>
   );

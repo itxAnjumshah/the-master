@@ -299,12 +299,29 @@ export default function AllCertificates() {
                     .join('');
                   printWindow.document.write(`<style>${styles}</style>`);
                   printWindow.document.write('</head><body>');
-                  printWindow.document.write(certificateContent.innerHTML);
+                  
+                  // Create a deep clone of the certificate content
+                  const clonedContent = certificateContent.cloneNode(true);
+                  
+                  // Convert relative image URLs to absolute URLs
+                  const images = clonedContent.getElementsByTagName('img');
+                  for (let img of images) {
+                    if (img.src) {
+                      const absoluteUrl = new URL(img.src, window.location.origin).href;
+                      img.src = absoluteUrl;
+                    }
+                  }
+                  
+                  printWindow.document.write(clonedContent.outerHTML);
                   printWindow.document.write('</body></html>');
                   printWindow.document.close();
                   printWindow.focus();
-                  printWindow.print();
-                  printWindow.close();
+                  
+                  // Wait for images to load before printing
+                  printWindow.onload = function() {
+                    printWindow.print();
+                    printWindow.close();
+                  };
                 } else {
                   alert('Certificate content not found.');
                 }
