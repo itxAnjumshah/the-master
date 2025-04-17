@@ -31,11 +31,17 @@ export default function Contact() {
             text: "+92 311 5566288",
             link: "https://wa.me/923115566288",
           },
+          {
+            icon: <FaWhatsapp className="text-green-400 text-2xl mx-3" />,
+            text: "+92 3489984743",
+            link: "https://wa.me/9203489984743",
+          },
+
 
           {
             icon: <FaFacebook className="text-blue-500 text-2xl mx-3" />,
-            text: "The master ",
-            link: "https://www.facebook.com/yourprofile",
+            text: "The master Training  center ",
+            link: "https://www.facebook.com/share/178uNESuDr/",
           },
           
         ].map((item, index) => (

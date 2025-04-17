@@ -218,9 +218,26 @@ export default function AddCertificate() {
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
-            <option value="Machine A">Machine A</option>
-            <option value="Machine B">Machine B</option>
-            <option value="Machine C">Machine C</option>
+            <option value="Motor Cycle">Motor Cycle</option>
+            <option value="Car">Car</option>
+            <option value="Tractor">Tractor</option>
+            <option value="Bus">Bus</option>
+            
+            <option value="10 wheeler Truck"> 10 wheeler Truck</option>
+            <option value="22 wheeler Truck">22 wheeler Truck</option>
+            <option value="Loader Machine">Loader Machine</option>
+            <option value="Chan Dozer">Chain Dozer</option>
+            <option value="Arm acevator">Arm Acevator</option>
+            <option value="container forklifts">container forklifts</option>
+
+            <option value="Roller machine">Roller Machine</option>
+            <option value="lifter">Lifter</option>
+            <option value="Bus">Bus</option>
+            <option value="Bus">Bus</option>
+            <option value="Bus">Bus</option>
+
+
+
           </select>
         </div>
         <div>
