@@ -41,7 +41,7 @@ export default function Certificate() {
 
   const handleSearch = useCallback(async () => {
     if (!searchInput.trim()) {
-      setSearchStatus({ type: 'error', message: 'Please enter your roll number' });
+      setSearchStatus({ type: 'error', message: 'Please enter a name or roll number' });
       return;
     }
 
@@ -50,32 +50,14 @@ export default function Certificate() {
     setRenderError(null);
 
     try {
-      const response = await api.get(`/api/certificates/${searchInput.trim()}`);
-      
-      if (response.data) {
-        setCertificateData(response.data);
-        setCertificate(true);
-        setSearchStatus({ type: 'success', message: 'Certificate Found ✅' });
-      } else {
-        throw new Error('No certificate data received');
-      }
+      const response = await api.get(`/api/certificates/${searchInput}`);
+      setCertificateData(response.data);
+      setCertificate(true);
+      setSearchStatus({ type: 'success', message: 'Certificate found!' });
     } catch (error) {
-      console.error('Certificate search error:', error);
+      console.error('Search error:', error);
+      setSearchStatus({ type: 'error', message: 'Certificate not found. Please check the details and try again.' });
       setCertificate(false);
-      setCertificateData(null);
-      let errorMessage = 'No Certificate Found ❌';
-      
-      if (error.response && error.response.status === 404) {
-        errorMessage = 'Certificate not found. Please check your roll number.';
-      } else if (error.response) {
-        errorMessage = error.response.data?.message || errorMessage;
-      } else if (error.request) {
-        errorMessage = 'Network error. Please check your connection.';
-      } else {
-        errorMessage = error.message || errorMessage;
-      }
-      
-      setSearchStatus({ type: 'error', message: errorMessage });
     } finally {
       setLoading(false);
     }
@@ -167,13 +149,15 @@ export default function Certificate() {
       return (
         <PremiumCertificate
           name={certificateData.name}
-          course={certificateData.machineName}
-          date={certificateData.date}
-          certificateNumber={certificateData.rollNo}
+          fatherName={certificateData.fatherName}
+          registrationNum={certificateData.registrationNum}
+          rollNo={certificateData.rollNo}
+          centerName={certificateData.centerName}
+          machineName={certificateData.machineName}
           proficiencyScore={certificateData.proficiencyScore}
           grade={certificateData.grade}
-          fatherName={certificateData.fatherName}
-          image={certificateData.image}
+          completedate={certificateData.completedate}
+          profileimg={certificateData.profileimg}
         />
       );
     } catch (error) {
@@ -191,12 +175,13 @@ export default function Certificate() {
           <div>
             <input
               type="text"
-              placeholder="Enter your roll number"
+              placeholder="Enter name or roll number"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            <p className="text-sm text-gray-500 mt-1">You can search by name or roll number</p>
           </div>
           <button
             onClick={handleSearch}

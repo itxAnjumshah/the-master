@@ -9,15 +9,24 @@ const certificateSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  registrationNum: {
+    type: String,
+    required: true
+  },
   rollNo: {
     type: String,
     required: true,
     unique: true
   },
+  centerName: {
+    type: String,
+    required: true
+  },
   machineName: {
     type: String,
     required: true
   },
+  
   proficiencyScore: {
     type: Number,
     required: true
@@ -26,15 +35,16 @@ const certificateSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  date: {
+  completedate: {
     type: Date,
     required: true
   },
-  image: {
+
+  profileimg: {
     type: String
   }
 }, {
   timestamps: true
 });
 
-module.exports = mongoose.model('Certificate', certificateSchema); 
+module.exports = mongoose.model('Certificate', certificateSchema);

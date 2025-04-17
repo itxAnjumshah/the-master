@@ -1,120 +1,269 @@
-import React from "react";
-import profilePic from "../assets/service6.jpg";
-import masterlogo2 from "../assets/master2logo.jpg";
-import { FaCertificate, FaMedal, FaAward, FaStar } from "react-icons/fa";
+import React, { useRef } from "react";
+import html2canvas from 'html2canvas';
 
-const Certificatedesign = ({ 
-  name, 
-  course, 
-  date, 
-  certificateNumber, 
-  proficiencyScore, 
-  grade, 
+export default function CertificateDesign({
+  name,
   fatherName,
-  image 
-}) => {
-  // Format date
-  const formattedDate = new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+  registrationNum,
+  rollNo,
+  centerName,
+  machineName,
+  proficiencyScore,
+  grade,
+  completedate,
+  profileimg
+}) {
+  const certificateRef = useRef(null);
+
+  const handleDownloadCertificate = async () => {
+    if (certificateRef.current) {
+      try {
+        const canvas = await html2canvas(certificateRef.current, {
+          scale: 2,
+          useCORS: true,
+        });
+        const imgData = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = 'certificate.png';
+        link.href = imgData;
+        link.click();
+      } catch (error) {
+        console.error('Error converting certificate to image:', error);
+      }
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="relative w-full max-w-3xl min-h-[450px] bg-yellow-400 mx-auto shadow-2xl overflow-hidden border-6 border-yellow-500 rounded-lg transform hover:scale-105 transition-transform duration-500 ease-in-out px-4 sm:px-8 py-4 sm:py-6">
-        {/* Certificate Border Layer */}
-        <div className="absolute inset-3 sm:inset-4 border-2 border-yellow-500 opacity-50 rounded-lg"></div>
-
-        {/* Decorative Icons */}
-        <div className="absolute top-3 left-3 bg-amber-100 p-2 rounded-full shadow-md">
-          <FaCertificate className="text-amber-600 text-lg" />
-        </div>
-        <div className="absolute top-3 right-3 bg-blue-100 p-2 rounded-full shadow-md">
-          <FaMedal className="text-blue-600 text-lg" />
-        </div>
-        <div className="absolute bottom-3 left-3 bg-blue-100 p-2 rounded-full shadow-md">
-          <FaAward className="text-blue-600 text-lg" />
-        </div>
-        <div className="absolute bottom-3 right-3 bg-amber-100 p-2 rounded-full shadow-md">
-          <FaStar className="text-amber-600 text-lg" />
-        </div>
-
-        {/* Background Watermark */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none">
-          <img src={masterlogo2} alt="Master Logo" className="w-full h-full object-cover" />
-        </div>
-
-        {/* Certificate Content */}
-        <div className="relative z-10 text-center h-full">
-          {/* Roll & Registration Number */}
-          <div className="flex justify-between text-xs sm:text-sm mb-3 font-semibold">
-            <div className="bg-gray-200 px-2 py-1 rounded-full text-black">Roll No: <span className="text-black">{certificateNumber}</span></div>
-            <div className="bg-gray-200 px-2 py-1 rounded-full text-black">Registration No: <span className="text-black">580123</span></div>
+    <div className="flex flex-col items-center">
+      
+      <div
+        ref={certificateRef}
+        style={{ 
+          width: "990px", 
+          height: "700px", 
+          backgroundImage: "url('/secondframe.png')",
+          backgroundSize: "990px 700px",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          position: "relative"
+        }}
+      >
+        {/* Top Row - Roll No and Reg No */}
+        <div style={{ 
+          // display: "flex", 
+          // flexDirection:"column",
+          // justifyContent:"space-between",
+               
+          position: "absolute", 
+          top: "180px", 
+          left: "50px", 
+          // right: "100px" 
+        }}>
+          <div style={{
+            // background: "linear-gradient(to right, #f0f7ff, #ffffff)",
+            // padding: "16px",
+            // borderRadius: "12px",
+            // boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            // border: "1px solid #dbeafe"
+          }}>
+            <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#4b5563" }}>
+              Roll No: <span style={{ fontWeight: 700, color: "#2563eb", fontSize: "20px" }}>{rollNo}</span>
+            </h3>
           </div>
+          <div style={{
+            // background: "linear-gradient(to right, #f0f7ff, #ffffff)",
+            // padding: "16px",
+            // borderRadius: "12px",
+            // boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            // border: "1px solid #dbeafe"
+          }}>
+            <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#4b5563" }}>
+              Reg No: <span style={{ fontWeight: 400, color: "#2563eb", fontSize: "20px" }}>{registrationNum}</span>
+            </h3>
+          </div>
+        </div>
 
-          {/* Header */}
-          <h1 className="text-lg sm:text-2xl font-bold text-black tracking-wide font-serif uppercase">The Master Technical Training Center</h1>
-          <div className="mt-2 mb-3 h-1 bg-gradient-to-r from-amber-500 to-blue-600 mx-auto w-1/3"></div>
-          <h2 className="text-md sm:text-xl font-semibold text-amber-700 font-serif">Certificate of Proficiency</h2>
-          <p className="italic text-xs text-black mt-1">*We build skill and empower*</p>
-
-          {/* Profile Image & Student Info */}
-          <div className="flex flex-col items-center my-4">
-            <div className="relative w-16 h-16 sm:w-24 sm:h-24 rounded-full border-4 border-amber-600 overflow-hidden shadow-lg">
-              <img 
-                src={image || profilePic} 
-                alt="Student" 
-                className="w-full h-full object-cover" 
+        {/* Title Section */}
+        <div style={{ 
+          textAlign: "center", 
+          marginTop: "100px", 
+          position: "relative" 
+        }}>
+          <h1 style={{ 
+            fontSize: "33px", 
+            fontWeight: 700, 
+            maxWidth:"30",
+            color: "#1d4ed8", 
+            textTransform: "uppercase", 
+            letterSpacing: "1px", 
+            marginBottom: "3px",
+            background: "linear-gradient(to right, #2563eb, #1e40af)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            textShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
+          }}>
+            {centerName}
+          </h1>
+          
+          <h2 style={{ 
+            fontSize: "24px", 
+            fontWeight: 600, 
+            color: "#4b5563", 
+            textTransform: "uppercase", 
+            letterSpacing: "2px", 
+            marginBottom: "1px" 
+          }}>
+            Certificate of Proficiency
+          </h2>
+          
+          <p style={{ marginBottom: "1px" }}> *We build skill and empower* </p>
+          
+          <h2 style={{ 
+            fontSize: "30px", 
+            color: "#16a34a", 
+            fontWeight: 600, 
+            marginBottom: "1px",
+            textAlign: "center" 
+          }}>
+            {name} 
+          </h2>
+          
+          <h4 style={{ fontSize: "18px", color: "#6b7280" }}>
+            Son of <span style={{ fontWeight: 600, color: "#2563eb" }}>{fatherName} </span>
+          </h4>
+          
+          <div style={{
+            position: "absolute",
+            top: "70px",
+            right: "120px",
+            width: "118px",
+            height: "140px",
+            borderRadius: "6px",
+            overflow: "hidden",
+            border: "2px solid #60a5fa",
+            boxShadow: "0 10px 15px rgba(0, 0, 0, 0.1)"
+          }}>
+            {profileimg && (
+              <img
+                src={profileimg}
+                alt="Profile"
+                style={{ width: "100%", height: "100%", objectFit: "fill" }}
               />
-            </div>
-            <h3 className="text-xl sm:text-2xl font-bold text-black mt-2 font-serif border-b-2 border-black px-4 pb-1">{name}</h3>
-            <p className="text-black mt-1 text-xs sm:text-md">S/o <span className="font-medium border-b border-black px-1">{fatherName}</span></p>
-            <div className="mt-2 px-4 py-1 bg-blue-200 rounded-full border border-blue-300 shadow-sm">
-              <p className="text-sm sm:text-md font-bold text-blue-800">{course}</p>
-            </div>
+            )}
           </div>
+        </div>
 
-          {/* Certification Statement */}
-          <p className="text-xl sm:text-md leading-relaxed text-black font-bold mb-4 px-4 sm:px-8">
-            has successfully completed the <span className="font-semibold text-green-700">{course}</span> training program<br />
-            with distinction and is hereby recognized as a qualified professional.
+        {/* Skill/Field */}
+        <h3 style={{ 
+          fontSize: "24px", 
+          fontWeight: 700, 
+          color: "#4f46e5", 
+          textAlign: "center", 
+          textTransform: "uppercase", 
+          letterSpacing: "1px", 
+          marginBottom: "2px",
+          marginTop: "1px"
+        }}>
+          {machineName} 
+        </h3>
+
+        {/* Description */}
+        <div style={{ 
+          maxWidth: "750px", 
+          margin: " auto" 
+        }}>
+          <p style={{ 
+            fontSize: "18px", 
+            textAlign: "center", 
+            color: "#4b5563", 
+            marginBottom: "20px", 
+            lineHeight: "1.5", 
+            padding: "14px",
+            background: "linear-gradient(to right, #f0f7ff, #ffffff)",
+            borderRadius: "12px",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)",
+            border: "1px solid #dbeafe"
+          }}>
+            This is to certify that <span style={{ fontWeight: 600, color: "#2563eb" }}>{name}</span> has
+            successfully completed the <span style={{ fontWeight: 600, color: "#2563eb" }}>{machineName}</span> training program with
+            distinction and is hereby recognized as a qualified professional.
           </p>
+        </div>
 
-          {/* Proficiency Score & Grade */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 px-4 sm:px-8">
-            <div className="text-center bg-amber-100 py-2 rounded-lg border border-amber-200 shadow-md">
-              <div className="text-xs text-black mb-1">PROFICIENCY SCORE</div>
-              <div className="text-lg sm:text-xl font-bold text-amber-700">{proficiencyScore}%</div>
-            </div>
-            <div className="text-center bg-blue-100 py-2 rounded-lg border border-blue-200 shadow-md">
-              <div className="text-xs text-black mb-1">GRADE</div>
-              <div className="text-lg sm:text-xl font-bold text-blue-700">{grade}</div>
+        {/* Signatures */}
+        <div style={{ 
+          display: "flex", 
+          justifyContent: "center", 
+          gap: "36px", 
+          alignItems: "center", 
+          marginBottom: "32px", 
+          color: "#4b5563" 
+        }}>
+          <div style={{
+            background: "linear-gradient(to right, #f0f7ff, #ffffff)",
+            padding: "16px",
+            borderRadius: "12px",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            border: "1px solid #dbeafe"
+          }}>
+            <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#4b5563" }}>
+              Proficiency: <span style={{ fontWeight: 700, color: "#2563eb", fontSize: "20px" }}>{proficiencyScore}</span>
+            </h3>
+          </div>
+          <div style={{
+            background: "linear-gradient(to right, #fefce8, #fef9c3)",
+            padding: "16px",
+            borderRadius: "12px",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            border: "1px solid #fde68a"
+          }}>
+            <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#4b5563" }}>
+              Grade: <span style={{ fontWeight: 700, color: "#16a34a", fontSize: "20px" }}>{grade}</span>
+            </h3>
+          </div>
+        </div>
+
+        {/* Date of Issue */}
+        <div style={{ 
+          display: "flex", 
+          alignItems: "center", 
+          gap: "16px", 
+          color: "#4b5563" 
+        }}>
+          <div style={{ textAlign: "center", flex: 1 }}>
+            <p style={{ fontWeight: 600, fontSize: "18px", fontFamily: "serif" }}>
+              Date of Issue: <span style={{ fontWeight: 500, color: "#374151" }}>{new Date(completedate).toLocaleDateString()}</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Signatures at bottom */}
+        <div style={{ 
+          // marginTop: "100px",
+          display: "flex", 
+          justifyContent: "space-evenly", 
+          alignItems: "center", 
+          gap: "10px", 
+          marginTop: "20px", 
+          color: "#4b5563" 
+        }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ width: "128px", borderBottom: "2px solid #9ca3af", marginTop: "8px", marginLeft: "auto", marginRight: "auto" }}></div>
+              <p style={{ fontWeight: 600, fontSize: "18px", fontFamily: "serif" }}>Instructor Sign</p>
             </div>
           </div>
 
-          {/* Date of Issue */}
-          <div className="text-center mb-4">
-            <div className="text-xs text-black mb-1">DATE OF ISSUE</div>
-            <div className="font-medium text-black">{formattedDate}</div>
-          </div>
-
-          {/* Signatures */}
-          <div className="flex justify-center items-end space-x-6 sm:space-x-16 relative">
-            <div className="text-center">
-              <div className="border-t-2 border-black w-24 sm:w-32 mb-2 mx-auto"></div>
-              <div className="text-xs text-black uppercase tracking-wider">Instructor's Signature</div>
-            </div>
-            <FaCertificate className="w-10 h-10 text-yellow-600 animate-pulse"/>
-            <div className="text-center">
-              <div className="border-t-2 border-black w-24 sm:w-32 mb-2 mx-auto"></div>
-              <div className="text-xs text-black uppercase tracking-wider">Director's Signature</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ width: "128px", borderBottom: "2px solid #9ca3af", marginTop: "10px", marginLeft: "auto", marginRight: "auto" }}></div>
+              <p style={{ fontWeight: 600, fontSize: "18px", fontFamily: "serif" }}>Director's Sign/Stamp</p>
             </div>
           </div>
         </div>
       </div>
+
+      
     </div>
   );
-};
-
-export default Certificatedesign;
+}

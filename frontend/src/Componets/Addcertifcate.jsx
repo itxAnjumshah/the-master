@@ -7,12 +7,14 @@ export default function AddCertificate() {
   const [certificate, setCertificate] = useState({
     name: "",
     fatherName: "",
+    registrationNum: "",
     rollNo: "",
+    centerName: "",
     machineName: "Machine A",
     proficiencyScore: "",
     grade: "Good",
-    date: "",
-    image: null,
+    completedate: "",
+    profileimg: null,
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -22,9 +24,12 @@ export default function AddCertificate() {
     const newErrors = {};
     if (!certificate.name.trim()) newErrors.name = 'Name is required';
     if (!certificate.fatherName.trim()) newErrors.fatherName = "Father's name is required";
+    if (!certificate.registrationNum.trim()) newErrors.registrationNum = 'Registration number is required';
     if (!certificate.rollNo.trim()) newErrors.rollNo = 'Roll number is required';
+    if (!certificate.centerName.trim()) newErrors.centerName = 'Center name is required';
+    if (!certificate.machineName.trim()) newErrors.machineName = 'Machine name is required';
     if (!certificate.proficiencyScore) newErrors.proficiencyScore = 'Proficiency score is required';
-    if (!certificate.date) newErrors.date = 'Date is required';
+    if (!certificate.completedate) newErrors.completedate = 'Completion date is required';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -56,12 +61,18 @@ export default function AddCertificate() {
     try {
       const formData = new FormData();
       Object.keys(certificate).forEach(key => {
-        if (key === 'image' && certificate[key]) {
-          formData.append('image', certificate[key]);
+        if (key === 'profileimg' && certificate[key]) {
+          formData.append(key, certificate[key]);
+        } else if (key === 'completedate') {
+          // Format date to ISO string
+          formData.append(key, new Date(certificate[key]).toISOString());
         } else {
           formData.append(key, certificate[key]);
         }
       });
+
+      // Log the form data for debugging
+      console.log('Submitting form data:', Object.fromEntries(formData));
 
       const response = await axios.post('http://localhost:5000/api/certificates', formData, {
         headers: {
@@ -74,12 +85,14 @@ export default function AddCertificate() {
       setCertificate({
         name: "",
         fatherName: "",
+        registrationNum: "",
         rollNo: "",
+        centerName: "",
         machineName: "Machine A",
         proficiencyScore: "",
         grade: "Good",
-        date: "",
-        image: null,
+        completedate: "",
+        profileimg: null,
       });
       
       // Redirect to all certificates page after 2 seconds
@@ -87,7 +100,29 @@ export default function AddCertificate() {
         navigate('/all-certificates');
       }, 2000);
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Failed to add certificate. Please try again.";
+      console.error('Error submitting form:', error);
+      let errorMessage = "Failed to add certificate. Please try again.";
+      
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Server response:', error.response.data);
+        if (error.response.data.errors) {
+          // Handle validation errors
+          errorMessage = error.response.data.errors.join(', ');
+        } else if (error.response.data.message) {
+          errorMessage = error.response.data.message;
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('No response received:', error.request);
+        errorMessage = "No response from server. Please check your connection.";
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error setting up request:', error.message);
+        errorMessage = error.message || errorMessage;
+      }
+      
       setMessage({ type: 'error', text: errorMessage });
     } finally {
       setLoading(false);
@@ -134,6 +169,20 @@ export default function AddCertificate() {
           {errors.fatherName && <p className="text-red-500 text-sm mt-1">{errors.fatherName}</p>}
         </div>
         <div>
+          <label className="block text-gray-700 font-medium">Registration Number *</label>
+          <input
+            type="text"
+            name="registrationNum"
+            value={certificate.registrationNum}
+            onChange={handleChange}
+            className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+              errors.registrationNum ? 'border-red-500' : 'border-gray-300'
+            }`}
+            placeholder="Enter registration number"
+          />
+          {errors.registrationNum && <p className="text-red-500 text-sm mt-1">{errors.registrationNum}</p>}
+        </div>
+        <div>
           <label className="block text-gray-700 font-medium">Roll No *</label>
           <input
             type="text"
@@ -146,6 +195,20 @@ export default function AddCertificate() {
             placeholder="Enter roll number"
           />
           {errors.rollNo && <p className="text-red-500 text-sm mt-1">{errors.rollNo}</p>}
+        </div>
+        <div>
+          <label className="block text-gray-700 font-medium">Center Name *</label>
+          <input
+            type="text"
+            name="centerName"
+            value={certificate.centerName}
+            onChange={handleChange}
+            className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+              errors.centerName ? 'border-red-500' : 'border-gray-300'
+            }`}
+            placeholder="Enter center name"
+          />
+          {errors.centerName && <p className="text-red-500 text-sm mt-1">{errors.centerName}</p>}
         </div>
         <div>
           <label className="block text-gray-700 font-medium">Machine Name</label>
@@ -190,23 +253,23 @@ export default function AddCertificate() {
           </select>
         </div>
         <div>
-          <label className="block text-gray-700 font-medium">Date of Issue *</label>
+          <label className="block text-gray-700 font-medium">Completion Date *</label>
           <input
             type="date"
-            name="date"
-            value={certificate.date}
+            name="completedate"
+            value={certificate.completedate}
             onChange={handleChange}
             className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
-              errors.date ? 'border-red-500' : 'border-gray-300'
+              errors.completedate ? 'border-red-500' : 'border-gray-300'
             }`}
           />
-          {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
+          {errors.completedate && <p className="text-red-500 text-sm mt-1">{errors.completedate}</p>}
         </div>
         <div>
           <label className="block text-gray-700 font-medium">Upload Image</label>
           <input
             type="file"
-            name="image"
+            name="profileimg"
             accept="image/*"
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"

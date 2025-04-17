@@ -27,12 +27,17 @@ const upload = multer({
 });
 
 // Create a new certificate
-router.post('/', upload.single('image'), async (req, res, next) => {
+router.post('/', upload.single('profileimg'), async (req, res, next) => {
   try {
     const certificateData = {
       ...req.body,
-      image: req.file ? req.file.path : null
+      profileimg: req.file?.path || null
     };
+
+    // Convert date string to Date object
+    if (certificateData.completedate) {
+      certificateData.completedate = new Date(certificateData.completedate);
+    }
 
     const certificate = new Certificate(certificateData);
     await certificate.save();
@@ -42,8 +47,11 @@ router.post('/', upload.single('image'), async (req, res, next) => {
       data: certificate
     });
   } catch (error) {
+    console.error('Error creating certificate:', error);
     if (error.name === 'ValidationError') {
       error.statusCode = 400;
+      error.message = 'Validation Error';
+      error.errors = Object.values(error.errors).map(err => err.message);
     }
     next(error);
   }
@@ -77,7 +85,7 @@ router.get('/', async (req, res, next) => {
     // Convert image paths to URLs
     const certificatesWithUrls = certificates.map(cert => ({
       ...cert,
-      image: cert.image ? `${req.protocol}://${req.get('host')}/${cert.image}` : null
+      profileimg: cert.profileimg ? `${req.protocol}://${req.get('host')}/${cert.profileimg}` : null
     }));
 
     res.json({
@@ -108,7 +116,7 @@ router.get('/:rollNo', async (req, res, next) => {
     // Convert image path to URL
     const certificateWithUrl = {
       ...certificate,
-      image: certificate.image ? `${req.protocol}://${req.get('host')}/${certificate.image}` : null
+      profileimg: certificate.profileimg ? `${req.protocol}://${req.get('host')}/${certificate.profileimg}` : null
     };
 
     res.json(certificateWithUrl);
@@ -118,11 +126,11 @@ router.get('/:rollNo', async (req, res, next) => {
 });
 
 // Update a certificate
-router.put('/:rollNo', upload.single('image'), async (req, res, next) => {
+router.put('/:rollNo', upload.single('profileimg'), async (req, res, next) => {
   try {
     const updateData = { ...req.body };
     if (req.file) {
-      updateData.image = req.file.path;
+      updateData.profileimg = req.file.path;
     }
 
     const certificate = await Certificate.findOneAndUpdate(

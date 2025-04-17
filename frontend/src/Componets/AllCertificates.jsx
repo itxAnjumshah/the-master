@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import PremiumCertificate from './Certiificatedesign';
-import { FaEdit, FaArrowLeft, FaArrowRight, FaTimes, FaTrash, FaImage, FaSearch } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaSearch, FaPrint, FaArrowLeft, FaArrowRight, FaUser, FaGraduationCap, FaCertificate } from 'react-icons/fa';
 
 const api = axios.create({
   baseURL: 'http://localhost:5000',
@@ -68,7 +68,7 @@ export default function AllCertificates() {
 
   const handleEdit = (certificate) => {
     setEditData({ ...certificate });
-    setPreviewImage(certificate.image);
+    setPreviewImage(certificate.profileimg);
     setIsEditing(true);
   };
 
@@ -87,15 +87,13 @@ export default function AllCertificates() {
   const handleUpdate = async () => {
     try {
       const formData = new FormData();
-      // Append all text fields
       Object.keys(editData).forEach(key => {
-        if (key !== 'newImage' && key !== 'image') {
+        if (key !== 'newImage' && key !== 'profileimg') {
           formData.append(key, editData[key]);
         }
       });
-      // Append image if there's a new one
       if (editData.newImage) {
-        formData.append('image', editData.newImage);
+        formData.append('profileimg', editData.newImage);
       }
 
       await api.put(`/api/certificates/${editData.rollNo}`, formData, {
@@ -104,7 +102,7 @@ export default function AllCertificates() {
         },
       });
       
-      fetchCertificates(); // Refresh the list
+      fetchCertificates();
       setIsEditing(false);
       setEditData(null);
       setPreviewImage(null);
@@ -119,14 +117,67 @@ export default function AllCertificates() {
       try {
         await api.delete(`/api/certificates/${certificate.rollNo}`);
         fetchCertificates();
-        if (currentIndex >= certificates.length - 1) {
-          setCurrentIndex(Math.max(0, certificates.length - 2));
+        if (currentIndex >= filteredCertificates.length - 1) {
+          setCurrentIndex(Math.max(0, filteredCertificates.length - 2));
         }
       } catch (err) {
         console.error('Error deleting certificate:', err);
         alert('Failed to delete certificate. Please try again.');
       }
     }
+  };
+
+  const handlePrint = (certificate) => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Certificate - ${certificate.name}</title>
+          <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+          <style>
+            @page {
+              size: A4 landscape;
+              margin: 0;
+            }
+            body {
+              margin: 0;
+              padding: 0;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
+            }
+            .certificate-container {
+              width: 100%;
+              height: 100vh;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              background-color: white;
+            }
+            * {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="certificate-container">
+            ${document.querySelector(`#certificate-${certificate.rollNo}`).innerHTML}
+          </div>
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+                window.close();
+              }, 1000);
+            }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   const nextCertificate = () => {
@@ -143,303 +194,223 @@ export default function AllCertificates() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-red-500 text-center">
-          <p className="text-xl font-bold mb-2">Error</p>
-          <p>{error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="bg-white p-8 rounded-xl shadow-lg text-center max-w-md">
+          <div className="text-red-500 text-4xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Error</h2>
+          <p className="text-gray-600">{error}</p>
         </div>
       </div>
     );
   }
 
-  if (certificates.length === 0) {
+  if (filteredCertificates.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-500 text-center">
-          <p className="text-xl font-bold mb-2">No Certificates Found</p>
-          <p>There are no certificates available to display.</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="bg-white p-8 rounded-xl shadow-lg text-center max-w-md">
+          <div className="text-gray-400 text-4xl mb-4">📄</div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">No Certificates Found</h2>
+          <p className="text-gray-600">There are no certificates available to display.</p>
         </div>
       </div>
     );
   }
 
-  const currentCertificate = filteredCertificates[currentIndex] || certificates[0];
+  const currentCertificate = filteredCertificates[currentIndex];
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-6">
       <div className="max-w-6xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          {/* Search Bar */}
-          <div className="mb-6">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search by name, roll number, or machine name..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentIndex(0); // Reset to first result when searching
-                }}
-                className="w-full px-4 py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            </div>
-            {searchQuery && (
-              <p className="mt-2 text-sm text-gray-600">
-                Found {filteredCertificates.length} matching certificates
-              </p>
-            )}
+        {/* Search Bar */}
+        <div className="mb-8">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by name, roll number, or machine name..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentIndex(0);
+              }}
+              className="w-full px-4 py-3 pl-12 pr-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+            />
+            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
+          {searchQuery && (
+            <p className="mt-2 text-sm text-gray-600">
+              Found {filteredCertificates.length} matching certificates
+            </p>
+          )}
+        </div>
 
-          {/* Navigation Header */}
-          {/* <div className="flex justify-between items-center mb-6">
-            <button
-              onClick={previousCertificate}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600"
-              disabled={filteredCertificates.length <= 1}
-            >
-              <FaArrowLeft /> Previousss
-            </button>
-            <div className="text-center">
-              <h2 className="text-2xl font-bold">
-                Certificate {currentIndex + 1} of {filteredCertificates.length}
-              </h2>
-              <p className="text-gray-600">Roll No: {currentCertificate.rollNo}</p>
-            </div>
-            <button
-              onClick={nextCertificate}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600"
-              disabled={filteredCertificates.length <= 1}
-            >
-              Next <FaArrowRight />
-            </button>
-          </div> */}
+        {/* Certificate Navigation and Controls */}
+        <div className="mb-6 flex justify-between items-center bg-white p-4 rounded-lg shadow-md">
+          <button
+            onClick={previousCertificate}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={filteredCertificates.length <= 1}
+          >
+            <FaArrowLeft /> Previous
+          </button>
+          <div className="text-center">
+            <h2 className="text-xl font-bold text-gray-800">
+              Certificate {currentIndex + 1} of {filteredCertificates.length}
+            </h2>
+            <p className="text-gray-600">Roll No: {currentCertificate?.rollNo}</p>
+          </div>
+          <button
+            onClick={nextCertificate}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={filteredCertificates.length <= 1}
+          >
+            Next <FaArrowRight />
+          </button>
+        </div>
 
-          {/* Certificate Display */}
-          <div className="relative flex flex-col items-center justify-center">
-            {/* <div className="absolute top-4 right-4 flex gap-2 z-10">
+        {/* Certificate Display */}
+        {currentCertificate && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex justify-end gap-2 mb-4">
+              <button
+                onClick={() => handlePrint(currentCertificate)}
+                className="bg-green-500 text-white p-2 rounded-full hover:bg-green-600 transition-all duration-300 transform hover:scale-110"
+                title="Print Certificate"
+              >
+                <FaPrint size={16} />
+              </button>
               <button
                 onClick={() => handleEdit(currentCertificate)}
-                className="bg-blue-500 text-white p-3 rounded-full hover:bg-blue-600 transition-colors"
+                className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-all duration-300 transform hover:scale-110"
+                title="Edit Certificate"
               >
-                <FaEdit size={20} />
+                <FaEdit size={16} />
               </button>
               <button
                 onClick={() => handleDelete(currentCertificate)}
-                className="bg-red-500 text-white p-3 rounded-full hover:bg-red-600 transition-colors"
+                className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-all duration-300 transform hover:scale-110"
+                title="Delete Certificate"
               >
-                <FaTrash size={20} />
+                <FaTrash size={16} />
               </button>
-            </div> */}
-            <div className="certificate-content">
+            </div>
+
+            {/* Certificate Preview */}
+            <div id={`certificate-${currentCertificate.rollNo}`} className="certificate-content w-full">
               <PremiumCertificate
                 name={currentCertificate.name}
-                course={currentCertificate.machineName}
-                date={currentCertificate.date}
-                certificateNumber={currentCertificate.rollNo}
+                fatherName={currentCertificate.fatherName}
+                registrationNum={currentCertificate.registrationNum}
+                rollNo={currentCertificate.rollNo}
+                centerName={currentCertificate.centerName}
+                machineName={currentCertificate.machineName}
+                machineImg={currentCertificate.machineImg}
                 proficiencyScore={currentCertificate.proficiencyScore}
                 grade={currentCertificate.grade}
-                fatherName={currentCertificate.fatherName}
-                image={currentCertificate.image}
+                completedate={currentCertificate.completedate}
+                profileimg={currentCertificate.profileimg}
               />
             </div>
           </div>
+        )}
 
-          <div className="flex justify-center items-center gap-4 mt-4">
-            <button
-              onClick={previousCertificate}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600"
-              disabled={filteredCertificates.length <= 1}
-            >
-              <FaArrowLeft /> Previous
-            </button>
-            <button
-              onClick={nextCertificate}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600"
-              disabled={filteredCertificates.length <= 1}
-            >
-              Next <FaArrowRight />
-            </button>
-            <button
-              onClick={() => handleEdit(currentCertificate)}
-              className="bg-blue-500 text-white p-3 rounded-full hover:bg-blue-600 transition-colors"
-            >
-              <FaEdit size={20} />
-            </button>
-            <button
-              onClick={() => handleDelete(currentCertificate)}
-              className="bg-red-500 text-white p-3 rounded-full hover:bg-red-600 transition-colors"
-            >
-              <FaTrash size={20} />
-            </button>
-            <button
-              onClick={() => {
-                const certificateContent = document.querySelector('.certificate-content');
-                if (certificateContent) {
-                  const printWindow = window.open('', '_blank');
-                  printWindow.document.write('<html><head><title>Print Certificate</title>');
-                  const styles = Array.from(document.styleSheets)
-                    .map(styleSheet => {
-                      try {
-                        return Array.from(styleSheet.cssRules)
-                          .map(rule => rule.cssText)
-                          .join('');
-                      } catch (e) {
-                        return '';
-                      }
-                    })
-                    .join('');
-                  printWindow.document.write(`<style>${styles}</style>`);
-                  printWindow.document.write('</head><body>');
-                  
-                  // Create a deep clone of the certificate content
-                  const clonedContent = certificateContent.cloneNode(true);
-                  
-                  // Convert relative image URLs to absolute URLs
-                  const images = clonedContent.getElementsByTagName('img');
-                  for (let img of images) {
-                    if (img.src) {
-                      const absoluteUrl = new URL(img.src, window.location.origin).href;
-                      img.src = absoluteUrl;
-                    }
-                  }
-                  
-                  printWindow.document.write(clonedContent.outerHTML);
-                  printWindow.document.write('</body></html>');
-                  printWindow.document.close();
-                  printWindow.focus();
-                  
-                  // Wait for images to load before printing
-                  printWindow.onload = function() {
-                    printWindow.print();
-                    printWindow.close();
-                  };
-                } else {
-                  alert('Certificate content not found.');
-                }
-              }}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              Print Certificate
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Edit Modal */}
-      {isEditing && editData && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-md p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Edit Certificate</h2>
-              <button
-                onClick={() => setIsEditing(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <FaTimes size={24} />
-              </button>
-            </div>
-            <div className="space-y-4">
-              {/* Image Upload Section */}
-              <div className="flex flex-col items-center space-y-2">
-                <div className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg overflow-hidden flex items-center justify-center relative">
-                  {previewImage ? (
-                    <img
-                      src={previewImage}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
+        {/* Edit Modal */}
+        {isEditing && editData && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-xl p-6 max-w-2xl w-full transform transition-all duration-300">
+              <h2 className="text-2xl font-bold mb-6 text-gray-800">Edit Certificate</h2>
+              <form onSubmit={(e) => { e.preventDefault(); handleUpdate(); }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-gray-700 mb-2 font-medium">Name</label>
+                    <input
+                      type="text"
+                      value={editData.name}
+                      onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                     />
-                  ) : (
-                    <FaImage size={40} className="text-gray-400" />
-                  )}
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-2 font-medium">Roll Number</label>
+                    <input
+                      type="text"
+                      value={editData.rollNo}
+                      onChange={(e) => setEditData({ ...editData, rollNo: e.target.value })}
+                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-2 font-medium">Machine Name</label>
+                    <input
+                      type="text"
+                      value={editData.machineName}
+                      onChange={(e) => setEditData({ ...editData, machineName: e.target.value })}
+                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-2 font-medium">Proficiency Score</label>
+                    <input
+                      type="number"
+                      value={editData.proficiencyScore}
+                      onChange={(e) => setEditData({ ...editData, proficiencyScore: e.target.value })}
+                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-2 font-medium">Grade</label>
+                    <select
+                      value={editData.grade}
+                      onChange={(e) => setEditData({ ...editData, grade: e.target.value })}
+                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                    >
+                      <option value="Good">Good</option>
+                      <option value="Bad">Bad</option>
+                      <option value="Excellent">Excellent</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-2 font-medium">Image</label>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleImageChange}
+                      accept="image/*"
+                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                    />
+                  </div>
                 </div>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleImageChange}
-                  accept="image/*"
-                  className="hidden"
-                />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="text-blue-500 hover:text-blue-600 flex items-center gap-2"
-                >
-                  <FaImage /> Change Image
-                </button>
-              </div>
-
-              {/* Existing form fields */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <input
-                  type="text"
-                  value={editData.name}
-                  onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Father's Name</label>
-                <input
-                  type="text"
-                  value={editData.fatherName}
-                  onChange={(e) => setEditData({ ...editData, fatherName: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Course</label>
-                <input
-                  type="text"
-                  value={editData.machineName}
-                  onChange={(e) => setEditData({ ...editData, machineName: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Proficiency Score</label>
-                <input
-                  type="number"
-                  value={editData.proficiencyScore}
-                  onChange={(e) => setEditData({ ...editData, proficiencyScore: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Grade</label>
-                <input
-                  type="text"
-                  value={editData.grade}
-                  onChange={(e) => setEditData({ ...editData, grade: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                />
-              </div>
-            </div>
-            <div className="mt-6 flex justify-end space-x-3">
-              <button
-                onClick={() => setIsEditing(false)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUpdate}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-              >
-                Save Changes
-              </button>
+                <div className="mt-8 flex justify-end gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setEditData(null);
+                      setPreviewImage(null);
+                    }}
+                    className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-300 transform hover:scale-105 font-medium"
+                  >
+                    Update Certificate
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 } 

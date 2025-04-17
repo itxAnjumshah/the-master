@@ -12,6 +12,7 @@ import Dashboard from './Pages/Dashboard';
 import Login from './Componets/Login';
 import ProtectedRoute from './Componets/ProtectedRoute';
 import AllCertificates from './Componets/AllCertificates';
+import Notfound from './Componets/Notfound';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
       <Route path="/green" element={<CertificateDesign />} />
       <Route path="/login" element={<Login />} />
       <Route path="/all-certificates" element={<AllCertificates />} />
+      <Route path="*" element={<Notfound />} />
       
       {/* Protected Dashboard Route */}
       <Route 
